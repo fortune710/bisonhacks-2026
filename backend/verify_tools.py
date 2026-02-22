@@ -21,12 +21,12 @@ async def verify_snap_rag():
 
 async def verify_food_locator():
     print("\n--- Verifying Food Locator Tool ---")
-    data = FoodLocatorInput(location="Washington, DC")
-    result = find_food_resources(data)
-    print(f"Location: {data.location}")
+    data = FoodLocatorInput(zip_code="20706")
+    result = await find_food_resources(data)
+    print(f"Location: {data.zip_code}")
     print(f"Found {len(result.resources)} resources.")
-    if result.resources:
-        print(f"First Result: {result.resources[0].name} - {result.resources[0].website}")
+    for resource in result.resources:
+        print(f"Resource: {resource.name} - {resource.address}\n")
 
 async def main():
     await verify_snap_eligibility()

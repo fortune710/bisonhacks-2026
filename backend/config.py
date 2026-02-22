@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     XAI_API_KEY: str = os.getenv("XAI_API_KEY", "")
     ELEVENLABS_API_KEY: str = os.getenv("ELEVENLABS_API_KEY", "")
     ELEVENLABS_AGENT_ID: str = os.getenv("ELEVENLABS_AGENT_ID", "")
+    PANTRY_API_KEY: str = os.getenv("PANTRY_API_KEY", "")
     
     PROJECT_NAME: str = "BisonHacks Backend"
     VERSION: str = "0.1.0"

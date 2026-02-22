@@ -40,6 +40,6 @@ async def snap_rag_tool(input_data: SNAPRAGInput):
 async def food_locator_tool(input_data: FoodLocatorInput):
     """Tool for Eleven Labs Agent to find nearby food resources."""
     try:
-        return find_food_resources(input_data)
+        return await find_food_resources(input_data)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
