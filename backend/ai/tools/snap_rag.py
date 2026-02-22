@@ -1,7 +1,16 @@
-from ddgs import DDGS
 from pydantic import BaseModel, Field
 from typing import List
 
+from langchain_core.documents import Document
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_community.vectorstores import MongoDBAtlasVectorSearch
+from langchain_core.embeddings import Embeddings  # just for type hint
+from backend.db.mongo import db
+
+# ----------------------
+# Models
+# ----------------------
 class SNAPRAGInput(BaseModel):
     question: str = Field(..., description="The question about SNAP or food assistance")
 
@@ -9,28 +18,65 @@ class SNAPRAGOutput(BaseModel):
     answer: str
     sources: List[str]
 
+# ----------------------
+# RAG setup
+# ----------------------
+# Gemini chat model
+llm = ChatGoogleGenerativeAI(
+    model="gemini-2.5-flash",
+    temperature=0
+)
+
+embeddings = GoogleGenerativeAIEmbeddings(model="gemini-embedding-001")
+
+
+# Connect to the MongoDB Atlas vector store
+vector_store = MongoDBAtlasVectorSearch(
+    collection=db["program_resources_vectors"],
+    embedding=embeddings,
+    index_name="bison_hacks"
+)
+
+
+# ----------------------
+# Search function
+# ----------------------
+
 def search_snap_info(input_data: SNAPRAGInput) -> SNAPRAGOutput:
-    """
-    Searches the web for information regarding SNAP and food assistance.
-    """
-    query = f"SNAP food assistance {input_data.question}"
-    sources = []
-    results_text = ""
-    
-    with DDGS() as ddgs:
-        # Get top 3 search results
-        results = list(ddgs.text(query, max_results=3))
-        for r in results:
-            results_text += f"\n- {r['title']}: {r['body']}\n"
-            sources.append(r['href'])
-            
-    if not results:
+    query = input_data.question
+
+    # Step 1: Retrieve top 5 relevant chunks from your vector store
+    retrieved_docs: List[Document] = vector_store.similarity_search(
+        query, k=5
+    )
+
+    print("Retrieved documents:", len(retrieved_docs)) 
+
+    if not retrieved_docs:
         return SNAPRAGOutput(
-            answer="I couldn't find specific information regarding that SNAP question at the moment. Please try rephrasing or contact a local SNAP office.",
+            answer="I couldn't find relevant information regarding that SNAP question. Please try rephrasing or contact a local SNAP office.",
             sources=[]
         )
-        
+
+    # Step 2: Combine the retrieved text to provide context
+    context_text = "\n".join([d.page_content for d in retrieved_docs])
+    sources = [d.metadata.get("filename", "") for d in retrieved_docs]
+
+    # Step 3: Ask Gemini to answer using the retrieved context
+    prompt = f"""
+        You are a helpful assistant for SNAP (food assistance) in the US.
+        Answer the following question based ONLY on the context below.
+
+        CONTEXT:
+        {context_text}
+
+        QUESTION:
+        {query}
+        """
+
+    response = llm.invoke(prompt)
+
     return SNAPRAGOutput(
-        answer=f"Here is what I found regarding your question '{input_data.question}':\n{results_text}",
+        answer=response.content,
         sources=sources
     )

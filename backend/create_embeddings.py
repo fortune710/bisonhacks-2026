@@ -17,24 +17,26 @@ COLLECTION_NAME = "program_resources_vectors"
 INDEX_NAME = "vector_index"
 
 
-# Gemini embeddings
+# load Gemini embeddings
 embeddings = GoogleGenerativeAIEmbeddings(
     model="gemini-embedding-001"
 )
 
-
-def main():
-    print("Starting embedding process...")
-
-    text_splitter = RecursiveCharacterTextSplitter(
+text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=CHUNK_SIZE,
         chunk_overlap=CHUNK_OVERLAP
     )
 
+def main():
+    print("Starting embedding process...")
+
+    
+
     vector_store = MongoDBAtlasVectorSearch(
         collection=db[COLLECTION_NAME],
         embedding=embeddings,
-        index_name=INDEX_NAME
+        index_name=INDEX_NAME,
+        #metadata_field="metadata"
     )
 
     docs_cursor = db.program_resources.find({})
@@ -76,7 +78,7 @@ def main():
         if documents:
             vector_store.add_documents(documents)
             print(f"Indexed {doc.get('filename')} ({len(documents)} chunks)")
-            time.sleep(30) # Sleep to respect rate limits
+            time.sleep(45) # Sleep to respect rate limits
     print("Finished creating embeddings.")
 
 
