@@ -1,6 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "AIzaSyDaLP2eQcb9Ut451_cWZJMRsXVRDIUXQiM" });
 
 export interface SnapResource {
   name: string;
@@ -18,7 +18,7 @@ export interface EligibilityResult {
 
 export const getSnapResources = async (zipcode: string, state: string) => {
   const model = "gemini-2.5-flash";
-  
+
   const prompt = `Find the following resources near zipcode ${zipcode} in ${state}:
   1. The closest SNAP (Supplemental Nutrition Assistance Program) or Social Services office. Provide address and phone.
   2. 3 budget-friendly grocery stores (like Aldi, Walmart, or local discount markets) that accept SNAP/EBT.
@@ -57,15 +57,15 @@ export const checkEligibility = async (familySize: number, monthlyIncome: number
   // 1: $1,215/mo (100%), SNAP limit is usually 130% gross income
   const fplBase = 15060 / 12; // 2024 FPL for 1 person
   const fplIncrement = 5380 / 12; // 2024 FPL increment per person
-  
+
   const grossIncomeLimit = (fplBase + (familySize - 1) * fplIncrement) * 1.3;
-  
+
   const isEligible = monthlyIncome <= grossIncomeLimit;
-  
+
   return {
     isEligible,
     limit: grossIncomeLimit,
-    reason: isEligible 
+    reason: isEligible
       ? `Your income of $${monthlyIncome} is below the estimated gross income limit of $${Math.round(grossIncomeLimit)} for a family of ${familySize} in ${state}.`
       : `Your income of $${monthlyIncome} exceeds the estimated gross income limit of $${Math.round(grossIncomeLimit)} for a family of ${familySize} in ${state}.`
   };

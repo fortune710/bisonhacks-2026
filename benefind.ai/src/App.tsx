@@ -4,38 +4,41 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  Search, 
-  MapPin, 
-  Users, 
-  DollarSign, 
-  ArrowRight, 
-  CheckCircle2, 
-  XCircle, 
-  Building2, 
-  ShoppingBasket, 
+import {
+  Search,
+  MapPin,
+  Users,
+  DollarSign,
+  ArrowRight,
+  CheckCircle2,
+  XCircle,
+  Building2,
+  ShoppingBasket,
   ExternalLink,
   Navigation,
   Car,
   Train,
   ChevronLeft,
-  Info
+  Info,
+  Mic
 } from 'lucide-react';
 import Markdown from 'react-markdown';
 import { checkEligibility, getSnapResources } from './services/geminiService';
 
 const STATES = [
-  "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "Florida", "Georgia", 
-  "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", 
-  "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", 
-  "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", 
+  "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "Florida", "Georgia",
+  "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland",
+  "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey",
+  "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina",
   "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"
 ];
 
 type Step = 'landing' | 'location' | 'household' | 'results';
 
 export default function App() {
+  const navigate = useNavigate();
   const [step, setStep] = useState<Step>('landing');
   const [formData, setFormData] = useState({
     state: '',
@@ -66,7 +69,7 @@ export default function App() {
     try {
       const eligibility = await checkEligibility(formData.familySize, formData.income, formData.state);
       const resources = await getSnapResources(formData.zipcode, formData.state);
-      
+
       // Parse sections
       const text = resources.text || '';
       const officeMatch = text.match(/\[SNAP_OFFICE\]([\s\S]*?)(?=\[GROCERY_STORES\]|\[FOOD_PANTRIES\]|$)/);
@@ -96,8 +99,8 @@ export default function App() {
       {/* Header */}
       <header className="border-b border-slate-100 bg-white/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div 
-            className="flex items-center gap-2 cursor-pointer" 
+          <div
+            className="flex items-center gap-2 cursor-pointer"
             onClick={() => setStep('landing')}
           >
             <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
@@ -114,7 +117,7 @@ export default function App() {
       <main className="max-w-5xl mx-auto px-6 py-12">
         <AnimatePresence mode="wait">
           {step === 'landing' && (
-            <motion.div 
+            <motion.div
               key="landing"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -128,13 +131,19 @@ export default function App() {
               <p className="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto mb-10 leading-relaxed">
                 Check your SNAP eligibility in minutes and find local resources to help you and your family thrive.
               </p>
-              <button 
+              <button
                 onClick={handleNext}
                 className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-lg shadow-emerald-200 transition-all hover:scale-105 flex items-center gap-2 mx-auto"
               >
                 Check Eligibility <ArrowRight className="w-5 h-5" />
               </button>
-              
+              <button
+                onClick={() => navigate('/agent')}
+                className="bg-white hover:bg-slate-50 text-slate-900 px-8 py-4 rounded-2xl font-semibold text-lg shadow-lg shadow-slate-200/50 transition-all hover:scale-105 flex items-center gap-2 mx-auto border border-slate-200"
+              >
+                Talk to AI Assistant <Mic className="w-5 h-5" />
+              </button>
+
               <div className="mt-24 grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
                 {[
                   { icon: CheckCircle2, title: "Quick Check", desc: "Answer a few simple questions to see if you qualify for SNAP benefits." },
@@ -152,7 +161,7 @@ export default function App() {
           )}
 
           {step === 'location' && (
-            <motion.div 
+            <motion.div
               key="location"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -164,11 +173,11 @@ export default function App() {
               </button>
               <h2 className="text-3xl font-bold mb-2">Where are you located?</h2>
               <p className="text-slate-500 mb-8">We use this to find local offices and stores near you.</p>
-              
+
               <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-2 uppercase tracking-wider">State</label>
-                  <select 
+                  <select
                     value={formData.state}
                     onChange={(e) => setFormData({ ...formData, state: e.target.value })}
                     className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-4 focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all appearance-none"
@@ -181,7 +190,7 @@ export default function App() {
                   <label className="block text-sm font-semibold text-slate-700 mb-2 uppercase tracking-wider">Zipcode</label>
                   <div className="relative">
                     <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
-                    <input 
+                    <input
                       type="text"
                       placeholder="e.g. 90210"
                       value={formData.zipcode}
@@ -190,7 +199,7 @@ export default function App() {
                     />
                   </div>
                 </div>
-                <button 
+                <button
                   disabled={!formData.state || formData.zipcode.length < 5}
                   onClick={handleNext}
                   className="w-full bg-slate-900 hover:bg-slate-800 disabled:bg-slate-200 text-white py-4 rounded-2xl font-semibold transition-all flex items-center justify-center gap-2"
@@ -202,7 +211,7 @@ export default function App() {
           )}
 
           {step === 'household' && (
-            <motion.div 
+            <motion.div
               key="household"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -214,13 +223,13 @@ export default function App() {
               </button>
               <h2 className="text-3xl font-bold mb-2">Tell us about your household</h2>
               <p className="text-slate-500 mb-8">This information helps us estimate your eligibility.</p>
-              
+
               <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-2 uppercase tracking-wider">Family Size</label>
                   <div className="relative">
                     <Users className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
-                    <input 
+                    <input
                       type="number"
                       min="1"
                       value={formData.familySize}
@@ -233,7 +242,7 @@ export default function App() {
                   <label className="block text-sm font-semibold text-slate-700 mb-2 uppercase tracking-wider">Monthly Gross Income</label>
                   <div className="relative">
                     <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
-                    <input 
+                    <input
                       type="number"
                       placeholder="0.00"
                       value={formData.income || ''}
@@ -245,7 +254,7 @@ export default function App() {
                     <Info className="w-3 h-3" /> Income before taxes and deductions.
                   </p>
                 </div>
-                <button 
+                <button
                   disabled={loading}
                   onClick={handleNext}
                   className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-200 text-white py-4 rounded-2xl font-semibold transition-all flex items-center justify-center gap-2"
@@ -257,7 +266,7 @@ export default function App() {
           )}
 
           {step === 'results' && results && (
-            <motion.div 
+            <motion.div
               key="results"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -284,9 +293,9 @@ export default function App() {
                       {results.eligibility.reason}
                     </p>
                     <div className="mt-6 flex flex-wrap gap-4">
-                      <a 
-                        href={`https://www.fns.usda.gov/snap/state-directory`} 
-                        target="_blank" 
+                      <a
+                        href={`https://www.fns.usda.gov/snap/state-directory`}
+                        target="_blank"
                         rel="noreferrer"
                         className="bg-slate-900 text-white px-6 py-3 rounded-xl text-sm font-semibold flex items-center gap-2 hover:bg-slate-800 transition-all"
                       >
@@ -311,7 +320,7 @@ export default function App() {
                           <Markdown>{results.resources.office}</Markdown>
                         </div>
                       )}
-                      
+
                       {results.resources.stores && (
                         <div>
                           <h4 className="text-lg font-bold text-emerald-700 mb-4">Budget-Friendly Grocery Stores</h4>
@@ -322,17 +331,17 @@ export default function App() {
                       {!results.resources.office && !results.resources.stores && (
                         <Markdown>{results.resources.fullText}</Markdown>
                       )}
-                      
+
                       {results.resources.groundingChunks.length > 0 && (
                         <div className="mt-8 pt-8 border-t border-slate-100">
                           <h4 className="text-sm font-bold uppercase tracking-wider text-slate-400 mb-4">Verified Sources</h4>
                           <div className="flex flex-wrap gap-3">
                             {results.resources.groundingChunks.map((chunk: any, i: number) => (
                               chunk.web && (
-                                <a 
-                                  key={i} 
-                                  href={chunk.web.uri} 
-                                  target="_blank" 
+                                <a
+                                  key={i}
+                                  href={chunk.web.uri}
+                                  target="_blank"
                                   rel="noreferrer"
                                   className="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 rounded-lg text-xs font-medium text-slate-600 transition-colors"
                                 >
