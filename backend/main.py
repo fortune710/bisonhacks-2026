@@ -1,12 +1,12 @@
 from fastapi import FastAPI
 from config import settings
-# from routers import ai_router
+from routers import ai_router
 from db.mongo import db
 
 app = FastAPI(title=settings.PROJECT_NAME, version=settings.VERSION)
 
 # Include routers
-# app.include_router(ai_router.router)
+app.include_router(ai_router.router)
 
 @app.get("/")
 async def root():
