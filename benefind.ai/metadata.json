@@ -1,0 +1,5 @@
+{
+  "name": "benefind.ai",
+  "description": "Check SNAP eligibility, find nearby offices, and discover budget-friendly grocery stores.",
+  "requestFramePermissions": ["geolocation"]
+}
