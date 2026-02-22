@@ -80,7 +80,7 @@ export default function VoiceAgent() {
             await navigator.mediaDevices.getUserMedia({ audio: true });
             await conversation.startSession({
                 agentId: AGENT_ID,
-                ...(isTextMode ? {} : {}),
+                ...(isTextMode ? { textOnly: true } : {}),
             });
         } catch (err) {
             console.error('Failed to start session:', err);
@@ -254,7 +254,7 @@ export default function VoiceAgent() {
                 )}
 
                 {/* Messages Feed */}
-                {isConnected && (
+                {isConnected && isTextMode && (
                     <div className="flex-1 overflow-y-auto py-4 space-y-4 min-h-0">
                         <AnimatePresence initial={false}>
                             {messages.map((msg) => (

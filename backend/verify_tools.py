@@ -5,9 +5,14 @@ from ai.tools.food_locator import FoodLocatorInput, find_food_resources
 
 async def verify_snap_eligibility():
     print("\n--- Verifying SNAP Eligibility Tool ---")
-    data = SNAPEligibilityInput(household_size=2, gross_monthly_income=1500, is_elderly_or_disabled=False)
+    data = SNAPEligibilityInput(
+        state="TX",
+        household_size=2,
+        gross_monthly_income=1500,
+        is_elderly_or_disabled=False
+    )
     result = check_snap_eligibility(data)
-    print(f"Input: Household Size 2, Income $1500")
+    print(f"Input: State TX, Household Size 2, Income $1500")
     print(f"Eligible: {result.is_eligible}")
     print(f"Reasoning: {result.reasoning}")
 
