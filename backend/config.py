@@ -13,4 +13,6 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "BisonHacks Backend"
     VERSION: str = "0.1.0"
 
+    PORT: int = int(os.getenv("PORT", "8000"))
+
 settings = Settings()
