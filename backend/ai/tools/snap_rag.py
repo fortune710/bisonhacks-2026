@@ -6,7 +6,7 @@ from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_community.vectorstores import MongoDBAtlasVectorSearch
 from langchain_core.embeddings import Embeddings  # just for type hint
-from backend.db.mongo import db
+from db.mongo import db
 
 # ----------------------
 # Models
