@@ -32,8 +32,12 @@ async def snap_eligibility_tool(input_data: SNAPEligibilityInput):
 async def snap_rag_tool(input_data: SNAPRAGInput):
     """Tool for Eleven Labs Agent to answer SNAP questions using web search."""
     try:
+        print(f"Executing SNAP RAG for question: {input_data.question}")
         return search_snap_info(input_data)
     except Exception as e:
+        print(f"Error in SNAP RAG tool: {str(e)}")
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/tools/food-locator", response_model=FoodLocatorOutput)
